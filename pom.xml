@@ -4,7 +4,7 @@
 
     <groupId>org.filesys</groupId>
     <artifactId>jfileserver-db-postgres</artifactId>
-    <version>1.0.0</version>
+    <version>1.0.1-SNAPSHOT</version>
 
     <name>${project.groupId}:${project.artifactId}</name>
     <description>JFileServer database filesystem implementation using PostGreSQL</description>
