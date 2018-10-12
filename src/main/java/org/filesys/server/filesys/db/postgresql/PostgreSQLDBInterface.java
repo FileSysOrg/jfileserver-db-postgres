@@ -1,8 +1,6 @@
 /*
  * Copyright (C) 2006-2010 Alfresco Software Limited.
  *
- * This file is part of Alfresco
- *
  * Alfresco is free software: you can redistribute it and/or modify
  * it under the terms of the GNU Lesser General Public License as published by
  * the Free Software Foundation, either version 3 of the License, or
