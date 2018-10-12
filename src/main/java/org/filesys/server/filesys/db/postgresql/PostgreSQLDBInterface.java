@@ -1,5 +1,6 @@
 /*
  * Copyright (C) 2006-2010 Alfresco Software Limited.
+ * Copyright (C) 2018 GK Spencer
  *
  * Alfresco is free software: you can redistribute it and/or modify
  * it under the terms of the GNU Lesser General Public License as published by
@@ -75,8 +76,8 @@ import org.springframework.extensions.config.ConfigElement;
 
 /**
  * PostgreSQL Database Interface Class
- * <p>
- * PostgreSQL specific implementation of the database interface used by the database filesystem
+ *
+ * <p>PostgreSQL specific implementation of the database interface used by the database filesystem
  * driver (DBDiskDriver).
  *
  * @author gkspencer
@@ -95,8 +96,7 @@ public class PostgreSQLDBInterface extends JdbcDBInterface implements DBQueueInt
     // File data fragment size, to be stored via an oid file
     public final static long OIDFileSize = MemorySize.GIGABYTE;
 
-    // Database connection and prepared statement used to write file requests to
-    // the queue tables
+    // Database connection and prepared statement used to write file requests to the queue tables
     private Connection m_dbConn;
     private PreparedStatement m_reqStmt;
     private PreparedStatement m_tranStmt;
@@ -133,7 +133,7 @@ public class PostgreSQLDBInterface extends JdbcDBInterface implements DBQueueInt
      *
      * @param dbCtx  DBDeviceContext
      * @param params ConfigElement
-     * @throws InvalidConfigurationException
+     * @throws InvalidConfigurationException Invalid configuration
      */
     public void initializeDatabase(DBDeviceContext dbCtx, ConfigElement params)
             throws InvalidConfigurationException {
@@ -401,7 +401,7 @@ public class PostgreSQLDBInterface extends JdbcDBInterface implements DBQueueInt
      * @param dirId int
      * @param fname String
      * @return FileStatus
-     * @throws DBException
+     * @throws DBException Database error
      */
     public FileStatus fileExists(int dirId, String fname)
             throws DBException {
@@ -471,8 +471,8 @@ public class PostgreSQLDBInterface extends JdbcDBInterface implements DBQueueInt
      * @param params FileOpenParams
      * @param retain boolean
      * @return int
-     * @throws DBException
-     * @throws FileExistsException
+     * @throws DBException Database error
+     * @throws FileExistsException File record already exists
      */
     public int createFileRecord(String fname, int dirId, FileOpenParams params, boolean retain)
             throws DBException, FileExistsException {
@@ -657,7 +657,7 @@ public class PostgreSQLDBInterface extends JdbcDBInterface implements DBQueueInt
      * @param sname String
      * @param fid   int
      * @return int
-     * @throws DBException
+     * @throws DBException Database error
      */
     public int createStreamRecord(String sname, int fid)
             throws DBException {
@@ -746,7 +746,7 @@ public class PostgreSQLDBInterface extends JdbcDBInterface implements DBQueueInt
      * @param dirId    int
      * @param fid      int
      * @param markOnly boolean
-     * @throws DBException
+     * @throws DBException Database error
      */
     public void deleteFileRecord(int dirId, int fid, boolean markOnly)
             throws DBException {
@@ -829,7 +829,7 @@ public class PostgreSQLDBInterface extends JdbcDBInterface implements DBQueueInt
      * @param fid      int
      * @param stid     int
      * @param markOnly boolean
-     * @throws DBException
+     * @throws DBException Database error
      */
     public void deleteStreamRecord(int fid, int stid, boolean markOnly)
             throws DBException {
@@ -886,7 +886,7 @@ public class PostgreSQLDBInterface extends JdbcDBInterface implements DBQueueInt
      * @param dirId int
      * @param fid   int
      * @param finfo FileInfo
-     * @throws DBException
+     * @throws DBException Database error
      */
     public void setFileInformation(int dirId, int fid, FileInfo finfo)
             throws DBException {
@@ -1042,7 +1042,7 @@ public class PostgreSQLDBInterface extends JdbcDBInterface implements DBQueueInt
      * @param fid   int
      * @param stid  int
      * @param sinfo StreamInfo
-     * @throws DBException
+     * @throws DBException Database error
      */
     public void setStreamInformation(int dirId, int fid, int stid, StreamInfo sinfo)
             throws DBException {
@@ -1141,7 +1141,7 @@ public class PostgreSQLDBInterface extends JdbcDBInterface implements DBQueueInt
      * @param dirOnly  boolean
      * @param caseLess boolean
      * @return int
-     * @throws DBException
+     * @throws DBException Database error
      */
     public int getFileId(int dirId, String fname, boolean dirOnly, boolean caseLess)
             throws DBException {
@@ -1243,7 +1243,7 @@ public class PostgreSQLDBInterface extends JdbcDBInterface implements DBQueueInt
      * @param fid       int
      * @param infoLevel int
      * @return FileInfo
-     * @throws DBException
+     * @throws DBException Database error
      */
     public DBFileInfo getFileInformation(int dirId, int fid, int infoLevel)
             throws DBException {
@@ -1406,7 +1406,7 @@ public class PostgreSQLDBInterface extends JdbcDBInterface implements DBQueueInt
      * @param stid      int
      * @param infoLevel int
      * @return StreamInfo
-     * @throws DBException
+     * @throws DBException Database error
      */
     public StreamInfo getStreamInformation(int fid, int stid, int infoLevel)
             throws DBException {
@@ -1525,7 +1525,7 @@ public class PostgreSQLDBInterface extends JdbcDBInterface implements DBQueueInt
      * @param fid       int
      * @param infoLevel int
      * @return StreamInfoList
-     * @throws DBException
+     * @throws DBException Database error
      */
     public StreamInfoList getStreamsList(int fid, int infoLevel)
             throws DBException {
@@ -1655,8 +1655,8 @@ public class PostgreSQLDBInterface extends JdbcDBInterface implements DBQueueInt
      * @param fid     int
      * @param newName String
      * @param newDir  int
-     * @throws DBException
-     * @throws FileNotFoundException
+     * @throws DBException Database error
+     * @throws FileNotFoundException File record not found
      */
     public void renameFileRecord(int dirId, int fid, String newName, int newDir)
             throws DBException, FileNotFoundException {
@@ -1720,7 +1720,7 @@ public class PostgreSQLDBInterface extends JdbcDBInterface implements DBQueueInt
      * @param fid     int
      * @param stid    int
      * @param newName String
-     * @throws DBException
+     * @throws DBException Database error
      */
     public void renameStreamRecord(int dirId, int fid, int stid, String newName)
             throws DBException {
@@ -1735,7 +1735,7 @@ public class PostgreSQLDBInterface extends JdbcDBInterface implements DBQueueInt
      * @param dirId int
      * @param fid   int
      * @return RetentionDetails
-     * @throws DBException
+     * @throws DBException Database error
      */
     public RetentionDetails getFileRetentionDetails(int dirId, int fid)
             throws DBException {
@@ -1797,7 +1797,7 @@ public class PostgreSQLDBInterface extends JdbcDBInterface implements DBQueueInt
      * @param infoLevel  int
      * @param maxRecords int
      * @return DBSearchContext
-     * @throws DBException
+     * @throws DBException Database error
      */
     public DBSearchContext startSearch(int dirId, String searchPath, int attrib, int infoLevel, int maxRecords)
             throws DBException {
@@ -1961,7 +1961,7 @@ public class PostgreSQLDBInterface extends JdbcDBInterface implements DBQueueInt
      * Queue a file request.
      *
      * @param req FileRequest
-     * @throws DBException
+     * @throws DBException Database error
      */
     public void queueFileRequest(FileRequest req)
             throws DBException {
@@ -2082,7 +2082,7 @@ public class PostgreSQLDBInterface extends JdbcDBInterface implements DBQueueInt
      * @param tempFilePrefix String
      * @param jarFilePrefix  String
      * @return FileRequestQueue
-     * @throws DBException
+     * @throws DBException Database error
      */
     public FileRequestQueue performQueueCleanup(File tempDir, String tempDirPrefix, String tempFilePrefix, String jarFilePrefix)
             throws DBException {
@@ -2456,7 +2456,7 @@ public class PostgreSQLDBInterface extends JdbcDBInterface implements DBQueueInt
      * @param tempFile String
      * @param lastFile boolean
      * @return boolean
-     * @throws DBException
+     * @throws DBException Database error
      */
     public boolean hasQueuedRequest(String tempFile, boolean lastFile)
             throws DBException {
@@ -2530,7 +2530,7 @@ public class PostgreSQLDBInterface extends JdbcDBInterface implements DBQueueInt
      * Delete a file request from the pending queue.
      *
      * @param fileReq FileRequest
-     * @throws DBException
+     * @throws DBException Database error
      */
     public void deleteFileRequest(FileRequest fileReq)
             throws DBException {
@@ -2593,7 +2593,7 @@ public class PostgreSQLDBInterface extends JdbcDBInterface implements DBQueueInt
      * @param reqQueue  FileRequestQueue
      * @param recLimit  int
      * @return int
-     * @throws DBException
+     * @throws DBException Database error
      */
     public int loadFileRequests(int fromSeqNo, int reqType, FileRequestQueue reqQueue, int recLimit)
             throws DBException {
@@ -2677,7 +2677,7 @@ public class PostgreSQLDBInterface extends JdbcDBInterface implements DBQueueInt
      *
      * @param tranReq MultiplFileRequest
      * @return MultipleFileRequest
-     * @throws DBException
+     * @throws DBException Database error
      */
     public MultipleFileRequest loadTransactionRequest(MultipleFileRequest tranReq)
             throws DBException {
@@ -2761,7 +2761,7 @@ public class PostgreSQLDBInterface extends JdbcDBInterface implements DBQueueInt
      * @param stmt Statement
      * @param fid  int
      * @return RetentionDetails
-     * @throws SQLException
+     * @throws SQLException SQL error
      */
     private final RetentionDetails getRetentionExpiryDateTime(Connection conn, Statement stmt, int fid)
             throws SQLException {
@@ -2797,7 +2797,7 @@ public class PostgreSQLDBInterface extends JdbcDBInterface implements DBQueueInt
      * @param stmt Statement
      * @param fid  int
      * @return boolean
-     * @throws SQLException
+     * @throws SQLException SQL error
      */
     private final boolean fileHasActiveRetention(Connection conn, Statement stmt, int fid)
             throws SQLException {
@@ -2818,7 +2818,7 @@ public class PostgreSQLDBInterface extends JdbcDBInterface implements DBQueueInt
     /**
      * Create the prepared statements used by the file request queueing database
      *
-     * @throws SQLException
+     * @throws SQLException SQL error
      */
     protected final void createQueueStatements()
             throws SQLException {
@@ -2857,7 +2857,7 @@ public class PostgreSQLDBInterface extends JdbcDBInterface implements DBQueueInt
      * @param fileId   int
      * @param streamId int
      * @return DBDataDetails
-     * @throws DBException
+     * @throws DBException Database error
      */
     public DBDataDetails getFileDataDetails(int fileId, int streamId)
             throws DBException {
@@ -2941,8 +2941,8 @@ public class PostgreSQLDBInterface extends JdbcDBInterface implements DBQueueInt
      * @param fileId   int
      * @param streamId int
      * @param fileSeg  FileSegment
-     * @throws DBException
-     * @throws IOException
+     * @throws DBException Database error
+     * @throws IOException I/O error
      */
     public void loadFileData(int fileId, int streamId, FileSegment fileSeg)
             throws DBException, IOException {
@@ -3123,8 +3123,8 @@ public class PostgreSQLDBInterface extends JdbcDBInterface implements DBQueueInt
      *
      * @param jarId  int
      * @param jarSeg FileSegment
-     * @throws DBException
-     * @throws IOException
+     * @throws DBException Database error
+     * @throws IOException I/O error
      */
     public void loadJarData(int jarId, FileSegment jarSeg)
             throws DBException, IOException {
@@ -3273,8 +3273,8 @@ public class PostgreSQLDBInterface extends JdbcDBInterface implements DBQueueInt
      * @param streamId int
      * @param fileSeg  FileSegment
      * @return int
-     * @throws DBException
-     * @throws IOException
+     * @throws DBException Database error
+     * @throws IOException I/O error
      */
     public int saveFileData(int fileId, int streamId, FileSegment fileSeg)
             throws DBException, IOException {
@@ -3499,8 +3499,8 @@ public class PostgreSQLDBInterface extends JdbcDBInterface implements DBQueueInt
      * @param jarPath  String
      * @param fileList DBDataDetailsList
      * @return int
-     * @throws DBException
-     * @throws IOException
+     * @throws DBException Database error
+     * @throws IOException I/O error
      */
     public int saveJarData(String jarPath, DBDataDetailsList fileList)
             throws DBException, IOException {
@@ -3654,8 +3654,8 @@ public class PostgreSQLDBInterface extends JdbcDBInterface implements DBQueueInt
      *
      * @param fileId   int
      * @param streamId int
-     * @throws DBException
-     * @throws IOException
+     * @throws DBException Database error
+     * @throws IOException I/O error
      */
     public void deleteFileData(int fileId, int streamId)
             throws DBException, IOException {
@@ -3773,8 +3773,8 @@ public class PostgreSQLDBInterface extends JdbcDBInterface implements DBQueueInt
      * Delete the file data for the specified Jar file
      *
      * @param jarId int
-     * @throws DBException
-     * @throws IOException
+     * @throws DBException Database error
+     * @throws IOException I/O error
      */
     public void deleteJarData(int jarId)
             throws DBException, IOException {
@@ -3881,7 +3881,7 @@ public class PostgreSQLDBInterface extends JdbcDBInterface implements DBQueueInt
      * @param fileId   int
      * @param streamId int
      * @param objectId String
-     * @throws DBException
+     * @throws DBException Database error
      */
     public void saveObjectId(int fileId, int streamId, String objectId)
             throws DBException {
@@ -3950,7 +3950,7 @@ public class PostgreSQLDBInterface extends JdbcDBInterface implements DBQueueInt
      * @param fileId   int
      * @param streamId int
      * @return String
-     * @throws DBException
+     * @throws DBException Database error
      */
     public String loadObjectId(int fileId, int streamId)
             throws DBException {
@@ -4015,7 +4015,7 @@ public class PostgreSQLDBInterface extends JdbcDBInterface implements DBQueueInt
      * @param fileId   int
      * @param streamId int
      * @param objectId String
-     * @throws DBException
+     * @throws DBException Database error
      */
     public void deleteObjectId(int fileId, int streamId, String objectId)
             throws DBException {
@@ -4071,7 +4071,7 @@ public class PostgreSQLDBInterface extends JdbcDBInterface implements DBQueueInt
      * @param dirId int
      * @param fid   int
      * @return String
-     * @throws DBException
+     * @throws DBException Database error
      */
     public String readSymbolicLink(int dirId, int fid)
             throws DBException {
@@ -4136,7 +4136,7 @@ public class PostgreSQLDBInterface extends JdbcDBInterface implements DBQueueInt
      *
      * @param dirId int
      * @param fid   int
-     * @throws DBException
+     * @throws DBException Database error
      */
     public void deleteSymbolicLinkRecord(int dirId, int fid)
             throws DBException {

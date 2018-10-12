@@ -1,5 +1,6 @@
 /*
  * Copyright (C) 2006-2011 Alfresco Software Limited.
+ * Copyright (C) 2018 GK Spencer
  *
  * Alfresco is free software: you can redistribute it and/or modify
  * it under the terms of the GNU Lesser General Public License as published by
@@ -37,10 +38,8 @@ public class PostgreSQLSearchContext extends DBSearchContext {
 	/**
 	 * Class constructor
 	 * 
-	 * @param rs
-	 *            ResultSet
-	 * @param filter
-	 *            WildCard
+	 * @param rs ResultSet
+	 * @param filter WildCard
 	 */
 	protected PostgreSQLSearchContext(ResultSet rs, WildCard filter) {
 		super(rs, filter);
@@ -50,24 +49,18 @@ public class PostgreSQLSearchContext extends DBSearchContext {
 	 * Return the next file from the search, or return false if there are no
 	 * more files
 	 * 
-	 * @param info
-	 *            FileInfo
+	 * @param info FileInfo
 	 * @return boolean
 	 */
 	public boolean nextFileInfo(FileInfo info) {
 
 		// Get the next file from the search
-
 		try {
 
-			// Return the next file details or loop until a match is found if a
-			// complex wildcard filter
-			// has been specified
-
+			// Return the next file details or loop until a match is found if a complex wildcard filter has been specified
 			while (m_rs.next()) {
 
 				// Get the file name for the next file
-
 				info.setFileId(m_rs.getInt("FileId"));
 				info.setFileName(m_rs.getString("FileName"));
 				info.setSize(m_rs.getLong("FileSize"));
@@ -89,7 +82,6 @@ public class PostgreSQLSearchContext extends DBSearchContext {
 					info.setAccessDateTime(accessDate);
 
 				// Build the file attributes flags
-
 				int attr = 0;
 
 				if (m_rs.getBoolean("ReadOnly") == true)
@@ -111,7 +103,6 @@ public class PostgreSQLSearchContext extends DBSearchContext {
 					attr += FileAttribute.Archive;
 
 				// Check if files should be marked as offline
-
 				if (hasMarkAsOffline()) {
 					if (getOfflineFileSize() == 0
 							|| info.getSize() >= getOfflineFileSize())
@@ -121,19 +112,16 @@ public class PostgreSQLSearchContext extends DBSearchContext {
 				info.setFileAttributes(attr);
 
 				// Get the group/owner id
-
 				info.setGid(m_rs.getInt("Gid"));
 				info.setUid(m_rs.getInt("Uid"));
 
 				info.setMode(m_rs.getInt("Mode"));
 
 				// Check if the file is a symbolic link
-
 				if (m_rs.getBoolean("IsSymLink") == true)
 					info.setFileType(FileType.SymbolicLink);
 
 				// Check if there is a complex wildcard filter
-
 				if (m_filter == null
 						|| m_filter.matchesPattern(info.getFileName()) == true)
 					return true;
@@ -143,7 +131,6 @@ public class PostgreSQLSearchContext extends DBSearchContext {
 		}
 
 		// No more files
-
 		closeSearch();
 		return false;
 	}
@@ -157,23 +144,17 @@ public class PostgreSQLSearchContext extends DBSearchContext {
 	public String nextFileName() {
 
 		// Get the next file from the search
-
 		try {
 
-			// Return the next file details or loop until a match is found if a
-			// complex wildcard filter
-			// has been specified
-
+			// Return the next file details or loop until a match is found if a complex wildcard filter has been specified
 			String fileName = null;
 
 			while (m_rs.next()) {
 
 				// Get the file name for the next file
-
 				fileName = m_rs.getString("FileName");
 
 				// Check if there is a complex wildcard filter
-
 				if (m_filter == null
 						|| m_filter.matchesPattern(fileName) == true)
 					return fileName;
@@ -183,7 +164,6 @@ public class PostgreSQLSearchContext extends DBSearchContext {
 		}
 
 		// No more files
-
 		return null;
 	}
 
@@ -193,13 +173,11 @@ public class PostgreSQLSearchContext extends DBSearchContext {
 	public void closeSearch() {
 
 		// Check if the resultset is valid, if so then close it
-
 		if ( m_rs != null) {
 			
 			try {
 
 				// Close the associated statement
-
 				Statement stmt = m_rs.getStatement();
 				if (stmt != null)
 					stmt.close();
@@ -212,7 +190,6 @@ public class PostgreSQLSearchContext extends DBSearchContext {
 		}
 
 		// Call the base class
-
 		super.closeSearch();
 	}
 }
