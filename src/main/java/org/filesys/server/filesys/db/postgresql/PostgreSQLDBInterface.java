@@ -154,6 +154,16 @@ public class PostgreSQLDBInterface extends JdbcDBInterface implements DBQueueInt
         // Create the database connection pool
         try {
             createConnectionPool();
+
+            // Check if we should wait for a database connection before continuing
+            if ( hasStartupWaitForConnection()) {
+
+                // Wait for a valid database connection
+                if ( getConnectionPool().waitForConnection( getStartupWaitForConnection()) == false)
+                    throw new Exception("Failed to get database connection during startup wait time (" + getStartupWaitForConnection() + "secs)");
+                else if ( Debug.EnableDbg && hasDebug())
+                    Debug.println("[PostgreSQL] Startup wait for database connection successful");
+            }
         }
         catch (Exception ex) {
 
