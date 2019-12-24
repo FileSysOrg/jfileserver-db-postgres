@@ -992,6 +992,7 @@ public class PostgreSQLDBInterface extends JdbcDBInterface implements DBQueueInt
                 // Add the SQL to update the change date/time
                 sql.append(" ChangeDate = ");
                 sql.append(finfo.getChangeDateTime());
+                sql.append(",");
             }
 
             // Check if the creation date/time has been set
@@ -1000,6 +1001,7 @@ public class PostgreSQLDBInterface extends JdbcDBInterface implements DBQueueInt
                 // Add the SQL to update the creation date/time
                 sql.append(" CreateDate = ");
                 sql.append(finfo.getCreationDateTime());
+                sql.append(",");
             }
 
             // Trim any trailing comma
