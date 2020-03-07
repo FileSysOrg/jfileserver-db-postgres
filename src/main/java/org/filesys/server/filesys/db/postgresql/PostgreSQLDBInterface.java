@@ -32,6 +32,7 @@ import java.sql.SQLException;
 import java.sql.Statement;
 import java.sql.Timestamp;
 import java.text.SimpleDateFormat;
+import java.util.EnumSet;
 
 import org.filesys.debug.Debug;
 import org.filesys.server.config.InvalidConfigurationException;
@@ -120,12 +121,12 @@ public class PostgreSQLDBInterface extends JdbcDBInterface implements DBQueueInt
     /**
      * Get the supported database features mask
      *
-     * @return int
+     * @return EnumSet&lt;Feature&gt;
      */
-    protected int getSupportedFeatures() {
+    protected EnumSet<Feature> getSupportedFeatures() {
 
         // Determine the available database interface features
-        return FeatureNTFS + FeatureRetention + FeatureSymLinks + FeatureQueue + FeatureData + FeatureJarData + FeatureObjectId;
+        return EnumSet.of( Feature.NTFS, Feature.Retention, Feature.SymLinks, Feature.Queue, Feature.Data, Feature.JarData, Feature.ObjectId);
     }
 
     /**
@@ -2010,7 +2011,7 @@ public class PostgreSQLDBInterface extends JdbcDBInterface implements DBQueueInt
 
                         m_reqStmt.setInt(1, fileReq.getFileId());
                         m_reqStmt.setInt(2, fileReq.getStreamId());
-                        m_reqStmt.setInt(3, fileReq.isType());
+                        m_reqStmt.setInt(3, fileReq.isType().intValue());
                         m_reqStmt.setString(4, fileReq.getTemporaryFile());
                         m_reqStmt.setString(5, fileReq.getVirtualPath());
                         m_reqStmt.setString(6, fileReq.getAttributesString());
@@ -2043,7 +2044,7 @@ public class PostgreSQLDBInterface extends JdbcDBInterface implements DBQueueInt
 
                         m_tranStmt.setInt(1, fileReq.getFileId());
                         m_tranStmt.setInt(2, fileReq.getStreamId());
-                        m_tranStmt.setInt(3, fileReq.isType());
+                        m_tranStmt.setInt(3, fileReq.isType().intValue());
                         m_tranStmt.setInt(4, fileReq.getTransactionId());
                         m_tranStmt.setString(5, fileReq.getTemporaryFile());
                         m_tranStmt.setString(6, fileReq.getVirtualPath());
@@ -2061,7 +2062,7 @@ public class PostgreSQLDBInterface extends JdbcDBInterface implements DBQueueInt
 
                 // If the request is a save then add to a pending queue to retry
                 // when the database is back online
-                if (fileReq.isType() == FileRequest.SAVE || fileReq.isType() == FileRequest.TRANSSAVE)
+                if (fileReq.isType() == FileRequest.RequestType.Save || fileReq.isType() == FileRequest.RequestType.TransSave)
                     queueOfflineSaveRequest(fileReq);
 
                 // DEBUG
@@ -2113,8 +2114,7 @@ public class PostgreSQLDBInterface extends JdbcDBInterface implements DBQueueInt
 
             // Delete all load requests from the queue
             stmt = conn.createStatement();
-            ResultSet rs = stmt.executeQuery("SELECT * FROM " + getQueueTableName() + " WHERE ReqType = " + FileRequest.LOAD
-                    + ";");
+            ResultSet rs = stmt.executeQuery("SELECT * FROM " + getQueueTableName() + " WHERE ReqType = " + FileRequest.RequestType.Load + ";");
 
             while (rs.next()) {
 
@@ -2167,7 +2167,7 @@ public class PostgreSQLDBInterface extends JdbcDBInterface implements DBQueueInt
             }
 
             // Delete the file load request records
-            stmt.execute("DELETE FROM " + getQueueTableName() + " WHERE ReqType = " + FileRequest.LOAD + ";");
+            stmt.execute("DELETE FROM " + getQueueTableName() + " WHERE ReqType = " + FileRequest.RequestType.Load + ";");
 
             // Create a statement to check if a temporary file is part of a save request
             pstmt = conn.prepareStatement("SELECT FileId,SeqNo FROM " + getQueueTableName() + " WHERE TempFile = ?;");
@@ -2274,7 +2274,7 @@ public class PostgreSQLDBInterface extends JdbcDBInterface implements DBQueueInt
                                                                                     .getAbsolutePath());
 
                                                                             fileSeg = new FileSegment(fileSegInfo, true);
-                                                                            fileSeg.setStatus(FileSegmentInfo.SaveWait, true);
+                                                                            fileSeg.setStatus(FileSegmentInfo.State.SaveWait, true);
 
                                                                             // Add the segment to the file state cache
                                                                             fstate.addAttribute(
@@ -2283,7 +2283,7 @@ public class PostgreSQLDBInterface extends JdbcDBInterface implements DBQueueInt
 
                                                                             // Add a file save request for the temp file to the recovery queue
                                                                             reqQueue.addRequest(new SingleFileRequest(
-                                                                                    FileRequest.SAVE, fid, 0, ldrFile
+                                                                                    FileRequest.RequestType.Save, fid, 0, ldrFile
                                                                                     .getAbsolutePath(), filesysPath,
                                                                                     fstate));
 
@@ -2601,13 +2601,13 @@ public class PostgreSQLDBInterface extends JdbcDBInterface implements DBQueueInt
      * Load a block of file request from the database into the specified queue.
      *
      * @param fromSeqNo int
-     * @param reqType   int
+     * @param reqType   FileRequest.RequestType
      * @param reqQueue  FileRequestQueue
      * @param recLimit  int
      * @return int
      * @throws DBException Database error
      */
-    public int loadFileRequests(int fromSeqNo, int reqType, FileRequestQueue reqQueue, int recLimit)
+    public int loadFileRequests(int fromSeqNo, FileRequest.RequestType reqType, FileRequestQueue reqQueue, int recLimit)
             throws DBException {
 
         // Load a block of file requests from the loader queue
@@ -2638,7 +2638,7 @@ public class PostgreSQLDBInterface extends JdbcDBInterface implements DBQueueInt
                 // Get the file request details
                 int fid = rs.getInt("FileId");
                 int stid = rs.getInt("StreamId");
-                int reqTyp = rs.getInt("ReqType");
+                FileRequest.RequestType reqTyp = FileRequest.RequestType.fromInt(rs.getInt("ReqType"));
                 int seqNo = rs.getInt("SeqNo");
                 String tempPath = rs.getString("TempFile");
                 String virtPath = rs.getString("VirtualPath");
@@ -2963,7 +2963,7 @@ public class PostgreSQLDBInterface extends JdbcDBInterface implements DBQueueInt
         FileOutputStream fileOut = new FileOutputStream(fileSeg.getTemporaryFile());
 
         // Update the segment status
-        fileSeg.setStatus(FileSegmentInfo.Loading);
+        fileSeg.setStatus(FileSegmentInfo.State.Loading);
 
         // DEBUG
         long startTime = 0L;
@@ -3221,7 +3221,7 @@ public class PostgreSQLDBInterface extends JdbcDBInterface implements DBQueueInt
             outJar.close();
 
             // Set the Jar file segment status to indicate that the data has been loaded
-            jarSeg.setStatus(FileSegmentInfo.Available, false);
+            jarSeg.setStatus(FileSegmentInfo.State.Available, false);
         }
         catch (SQLException ex) {
 
