@@ -70,6 +70,7 @@ import org.filesys.util.MemorySize;
 import org.filesys.util.StringList;
 import org.filesys.util.WildCard;
 import org.filesys.util.db.DBConnectionPool;
+import org.filesys.util.db.DBStatus;
 import org.postgresql.PGConnection;
 import org.postgresql.largeobject.LargeObject;
 import org.postgresql.largeobject.LargeObjectManager;
@@ -1254,11 +1255,11 @@ public class PostgreSQLDBInterface extends JdbcDBInterface implements DBQueueInt
      *
      * @param dirId     int
      * @param fid       int
-     * @param infoLevel int
+     * @param infoLevel DBInterface.FileInfoLevel
      * @return FileInfo
      * @throws DBException Database error
      */
-    public DBFileInfo getFileInformation(int dirId, int fid, int infoLevel)
+    public DBFileInfo getFileInformation(int dirId, int fid, DBInterface.FileInfoLevel infoLevel)
             throws DBException {
 
         // Create a SQL select for the required file information
@@ -1270,17 +1271,17 @@ public class PostgreSQLDBInterface extends JdbcDBInterface implements DBQueueInt
         switch (infoLevel) {
 
             // File name only
-            case DBInterface.FileNameOnly:
+            case NameOnly:
                 sql.append("FileName");
                 break;
 
             // File ids and name
-            case DBInterface.FileIds:
+            case Ids:
                 sql.append("FileName,FileId,DirId");
                 break;
 
             // All file information
-            case DBInterface.FileAll:
+            case All:
                 sql.append("*");
                 break;
 
@@ -1323,18 +1324,18 @@ public class PostgreSQLDBInterface extends JdbcDBInterface implements DBQueueInt
                 switch (infoLevel) {
 
                     // File name only
-                    case DBInterface.FileNameOnly:
+                    case NameOnly:
                         finfo.setFileName(rs.getString("FileName"));
                         break;
 
                     // File ids and name
-                    case DBInterface.FileIds:
+                    case Ids:
                         finfo.setFileName(rs.getString("FileName"));
                         finfo.setDirectoryId(rs.getInt("DirId"));
                         break;
 
                     // All file information
-                    case DBInterface.FileAll:
+                    case All:
                         finfo.setFileName(rs.getString("FileName"));
                         finfo.setSize(rs.getLong("FileSize"));
                         finfo.setAllocationSize(finfo.getSize());
@@ -1417,11 +1418,11 @@ public class PostgreSQLDBInterface extends JdbcDBInterface implements DBQueueInt
      *
      * @param fid       int
      * @param stid      int
-     * @param infoLevel int
+     * @param infoLevel DBInterface.StreamInfoLevel
      * @return StreamInfo
      * @throws DBException Database error
      */
-    public StreamInfo getStreamInformation(int fid, int stid, int infoLevel)
+    public StreamInfo getStreamInformation(int fid, int stid, DBInterface.StreamInfoLevel infoLevel)
             throws DBException {
 
         // Create a SQL select for the required stream information
@@ -1435,13 +1436,13 @@ public class PostgreSQLDBInterface extends JdbcDBInterface implements DBQueueInt
             // Stream name only.
             //
             // Also used if ids are requested as we already have the ids
-            case DBInterface.StreamNameOnly:
-            case DBInterface.StreamIds:
+            case NameOnly:
+            case Ids:
                 sql.append("StreamName");
                 break;
 
             // All file information
-            case DBInterface.StreamAll:
+            case All:
                 sql.append("*");
                 break;
 
@@ -1485,13 +1486,13 @@ public class PostgreSQLDBInterface extends JdbcDBInterface implements DBQueueInt
                 switch (infoLevel) {
 
                     // Stream name only (or name and ids)
-                    case DBInterface.StreamNameOnly:
-                    case DBInterface.StreamIds:
+                    case NameOnly:
+                    case Ids:
                         sinfo.setName(rs.getString("StreamName"));
                         break;
 
                     // All stream information
-                    case DBInterface.FileAll:
+                    case All:
                         sinfo.setName(rs.getString("StreamName"));
                         sinfo.setSize(rs.getLong("StreamSize"));
 
@@ -1536,11 +1537,11 @@ public class PostgreSQLDBInterface extends JdbcDBInterface implements DBQueueInt
      * Return the list of streams for the specified file
      *
      * @param fid       int
-     * @param infoLevel int
+     * @param infoLevel DBInterface.StreamInfoLevel
      * @return StreamInfoList
      * @throws DBException Database error
      */
-    public StreamInfoList getStreamsList(int fid, int infoLevel)
+    public StreamInfoList getStreamsList(int fid, DBInterface.StreamInfoLevel infoLevel)
             throws DBException {
 
         // Create a SQL select for the required stream information
@@ -1552,17 +1553,17 @@ public class PostgreSQLDBInterface extends JdbcDBInterface implements DBQueueInt
         switch (infoLevel) {
 
             // Stream name only.
-            case DBInterface.StreamNameOnly:
+            case NameOnly:
                 sql.append("StreamName");
                 break;
 
             // Stream name and ids
-            case DBInterface.StreamIds:
+            case Ids:
                 sql.append("StreamName,FileId,StreamId");
                 break;
 
             // All file information
-            case DBInterface.StreamAll:
+            case All:
                 sql.append("*");
                 break;
 
@@ -1605,18 +1606,18 @@ public class PostgreSQLDBInterface extends JdbcDBInterface implements DBQueueInt
                 switch (infoLevel) {
 
                     // Stream name only
-                    case DBInterface.StreamNameOnly:
+                    case NameOnly:
                         sinfo.setName(rs.getString("StreamName"));
                         break;
 
                     // Stream name and id
-                    case DBInterface.StreamIds:
+                    case Ids:
                         sinfo.setName(rs.getString("StreamName"));
                         sinfo.setStreamId(rs.getInt("StreamId"));
                         break;
 
                     // All stream information
-                    case DBInterface.FileAll:
+                    case All:
                         sinfo.setName(rs.getString("StreamName"));
                         sinfo.setStreamId(rs.getInt("StreamId"));
                         sinfo.setSize(rs.getLong("StreamSize"));
@@ -1807,12 +1808,12 @@ public class PostgreSQLDBInterface extends JdbcDBInterface implements DBQueueInt
      * @param dirId      int
      * @param searchPath String
      * @param attrib     int
-     * @param infoLevel  int
+     * @param infoLevel  DBInterface.FileInfoLevel
      * @param maxRecords int
      * @return DBSearchContext
      * @throws DBException Database error
      */
-    public DBSearchContext startSearch(int dirId, String searchPath, int attrib, int infoLevel, int maxRecords)
+    public DBSearchContext startSearch(int dirId, String searchPath, int attrib, DBInterface.FileInfoLevel infoLevel, int maxRecords)
             throws DBException {
 
         // Search for files/folders in the specified folder
@@ -2056,7 +2057,7 @@ public class PostgreSQLDBInterface extends JdbcDBInterface implements DBQueueInt
 
                 // File request was queued successfully, check for any offline file requests
                 if (hasOfflineFileRequests())
-                    databaseOnlineStatus(true);
+                    databaseOnlineStatus(DBStatus.Online);
             }
             catch (SQLException ex) {
 
