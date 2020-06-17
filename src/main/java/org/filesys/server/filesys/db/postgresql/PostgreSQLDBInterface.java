@@ -57,13 +57,7 @@ import org.filesys.server.filesys.db.DBSearchContext;
 import org.filesys.server.filesys.db.JdbcDBInterface;
 import org.filesys.server.filesys.db.ObjectIdFileLoader;
 import org.filesys.server.filesys.db.RetentionDetails;
-import org.filesys.server.filesys.loader.CachedFileInfo;
-import org.filesys.server.filesys.loader.FileRequest;
-import org.filesys.server.filesys.loader.FileRequestQueue;
-import org.filesys.server.filesys.loader.FileSegment;
-import org.filesys.server.filesys.loader.FileSegmentInfo;
-import org.filesys.server.filesys.loader.MultipleFileRequest;
-import org.filesys.server.filesys.loader.SingleFileRequest;
+import org.filesys.server.filesys.loader.*;
 import org.filesys.smb.server.ntfs.StreamInfo;
 import org.filesys.smb.server.ntfs.StreamInfoList;
 import org.filesys.util.MemorySize;
@@ -127,7 +121,11 @@ public class PostgreSQLDBInterface extends JdbcDBInterface implements DBQueueInt
     protected EnumSet<Feature> getSupportedFeatures() {
 
         // Determine the available database interface features
-        return EnumSet.of( Feature.NTFS, Feature.Retention, Feature.SymLinks, Feature.Queue, Feature.Data, Feature.JarData, Feature.ObjectId);
+        EnumSet<Feature> supFeatures = EnumSet.of( Feature.NTFS, Feature.Retention, Feature.SymLinks, Feature.Queue, Feature.Data);
+        supFeatures.add( Feature.JarData);
+        supFeatures.add( Feature.ObjectId);
+
+        return supFeatures;
     }
 
     /**
@@ -1255,11 +1253,11 @@ public class PostgreSQLDBInterface extends JdbcDBInterface implements DBQueueInt
      *
      * @param dirId     int
      * @param fid       int
-     * @param infoLevel DBInterface.FileInfoLevel
+     * @param infoLevel FileInfoLevel
      * @return FileInfo
      * @throws DBException Database error
      */
-    public DBFileInfo getFileInformation(int dirId, int fid, DBInterface.FileInfoLevel infoLevel)
+    public DBFileInfo getFileInformation(int dirId, int fid, FileInfoLevel infoLevel)
             throws DBException {
 
         // Create a SQL select for the required file information
@@ -1418,11 +1416,11 @@ public class PostgreSQLDBInterface extends JdbcDBInterface implements DBQueueInt
      *
      * @param fid       int
      * @param stid      int
-     * @param infoLevel DBInterface.StreamInfoLevel
+     * @param infoLevel StreamInfoLevel
      * @return StreamInfo
      * @throws DBException Database error
      */
-    public StreamInfo getStreamInformation(int fid, int stid, DBInterface.StreamInfoLevel infoLevel)
+    public StreamInfo getStreamInformation(int fid, int stid, StreamInfoLevel infoLevel)
             throws DBException {
 
         // Create a SQL select for the required stream information
@@ -1537,11 +1535,11 @@ public class PostgreSQLDBInterface extends JdbcDBInterface implements DBQueueInt
      * Return the list of streams for the specified file
      *
      * @param fid       int
-     * @param infoLevel DBInterface.StreamInfoLevel
+     * @param infoLevel StreamInfoLevel
      * @return StreamInfoList
      * @throws DBException Database error
      */
-    public StreamInfoList getStreamsList(int fid, DBInterface.StreamInfoLevel infoLevel)
+    public StreamInfoList getStreamsList(int fid, StreamInfoLevel infoLevel)
             throws DBException {
 
         // Create a SQL select for the required stream information
@@ -1808,12 +1806,12 @@ public class PostgreSQLDBInterface extends JdbcDBInterface implements DBQueueInt
      * @param dirId      int
      * @param searchPath String
      * @param attrib     int
-     * @param infoLevel  DBInterface.FileInfoLevel
+     * @param infoLevel  FileInfoLevel
      * @param maxRecords int
      * @return DBSearchContext
      * @throws DBException Database error
      */
-    public DBSearchContext startSearch(int dirId, String searchPath, int attrib, DBInterface.FileInfoLevel infoLevel, int maxRecords)
+    public DBSearchContext startSearch(int dirId, String searchPath, int attrib, FileInfoLevel infoLevel, int maxRecords)
             throws DBException {
 
         // Search for files/folders in the specified folder
@@ -2012,7 +2010,7 @@ public class PostgreSQLDBInterface extends JdbcDBInterface implements DBQueueInt
 
                         m_reqStmt.setInt(1, fileReq.getFileId());
                         m_reqStmt.setInt(2, fileReq.getStreamId());
-                        m_reqStmt.setInt(3, fileReq.isType().intValue());
+                        m_reqStmt.setInt(3, fileReq.isType().ordinal());
                         m_reqStmt.setString(4, fileReq.getTemporaryFile());
                         m_reqStmt.setString(5, fileReq.getVirtualPath());
                         m_reqStmt.setString(6, fileReq.getAttributesString());
@@ -2045,7 +2043,7 @@ public class PostgreSQLDBInterface extends JdbcDBInterface implements DBQueueInt
 
                         m_tranStmt.setInt(1, fileReq.getFileId());
                         m_tranStmt.setInt(2, fileReq.getStreamId());
-                        m_tranStmt.setInt(3, fileReq.isType().intValue());
+                        m_tranStmt.setInt(3, fileReq.isType().ordinal());
                         m_tranStmt.setInt(4, fileReq.getTransactionId());
                         m_tranStmt.setString(5, fileReq.getTemporaryFile());
                         m_tranStmt.setString(6, fileReq.getVirtualPath());
@@ -2115,7 +2113,8 @@ public class PostgreSQLDBInterface extends JdbcDBInterface implements DBQueueInt
 
             // Delete all load requests from the queue
             stmt = conn.createStatement();
-            ResultSet rs = stmt.executeQuery("SELECT * FROM " + getQueueTableName() + " WHERE ReqType = " + FileRequest.RequestType.Load + ";");
+            ResultSet rs = stmt.executeQuery("SELECT * FROM " + getQueueTableName() + " WHERE ReqType = " + FileRequest.RequestType.Load.ordinal()
+                    + ";");
 
             while (rs.next()) {
 
@@ -2168,7 +2167,7 @@ public class PostgreSQLDBInterface extends JdbcDBInterface implements DBQueueInt
             }
 
             // Delete the file load request records
-            stmt.execute("DELETE FROM " + getQueueTableName() + " WHERE ReqType = " + FileRequest.RequestType.Load + ";");
+            stmt.execute("DELETE FROM " + getQueueTableName() + " WHERE ReqType = " + FileRequest.RequestType.Load.ordinal() + ";");
 
             // Create a statement to check if a temporary file is part of a save request
             pstmt = conn.prepareStatement("SELECT FileId,SeqNo FROM " + getQueueTableName() + " WHERE TempFile = ?;");
@@ -2275,7 +2274,7 @@ public class PostgreSQLDBInterface extends JdbcDBInterface implements DBQueueInt
                                                                                     .getAbsolutePath());
 
                                                                             fileSeg = new FileSegment(fileSegInfo, true);
-                                                                            fileSeg.setStatus(FileSegmentInfo.State.SaveWait, true);
+                                                                            fileSeg.setStatus(SegmentInfo.State.SaveWait, true);
 
                                                                             // Add the segment to the file state cache
                                                                             fstate.addAttribute(
