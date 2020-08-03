@@ -2623,7 +2623,7 @@ public class PostgreSQLDBInterface extends JdbcDBInterface implements DBQueueInt
             stmt = conn.createStatement();
 
             // Build the SQL to load the queue records
-            String sql = "SELECT * FROM " + getQueueTableName() + " WHERE SeqNo > " + fromSeqNo + " AND ReqType = " + reqType
+            String sql = "SELECT * FROM " + getQueueTableName() + " WHERE SeqNo > " + fromSeqNo + " AND ReqType = " + reqType.ordinal()
                     + " ORDER BY SeqNo LIMIT " + recLimit + ";";
 
             // DEBUG
