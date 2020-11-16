@@ -917,7 +917,7 @@ public class PostgreSQLDBInterface extends JdbcDBInterface implements DBQueueInt
             sql.append(" SET ");
 
             // Check if the file attributes have been updated
-            if (finfo.hasSetFlag(FileInfo.Set.Attributes)) {
+            if (finfo.hasSetFlag(FileInfo.SetAttributes)) {
 
                 // Update the basic file attributes
                 sql.append("ReadOnly = ");
@@ -935,7 +935,7 @@ public class PostgreSQLDBInterface extends JdbcDBInterface implements DBQueueInt
             }
 
             // Check if the file size should be set
-            if (finfo.hasSetFlag(FileInfo.Set.FileSize)) {
+            if (finfo.hasSetFlag(FileInfo.SetFileSize)) {
 
                 // Update the file size
                 sql.append("FileSize = ");
@@ -944,7 +944,7 @@ public class PostgreSQLDBInterface extends JdbcDBInterface implements DBQueueInt
             }
 
             // Merge the group id, user id and mode into the in-memory file information
-            if (finfo.hasSetFlag(FileInfo.Set.GID)) {
+            if (finfo.hasSetFlag(FileInfo.SetGid)) {
 
                 // Update the group id
                 sql.append("Gid = ");
@@ -952,7 +952,7 @@ public class PostgreSQLDBInterface extends JdbcDBInterface implements DBQueueInt
                 sql.append(",");
             }
 
-            if (finfo.hasSetFlag(FileInfo.Set.UID)) {
+            if (finfo.hasSetFlag(FileInfo.SetUid)) {
 
                 // Update the user id
                 sql.append("Uid = ");
@@ -960,7 +960,7 @@ public class PostgreSQLDBInterface extends JdbcDBInterface implements DBQueueInt
                 sql.append(",");
             }
 
-            if (finfo.hasSetFlag(FileInfo.Set.Mode)) {
+            if (finfo.hasSetFlag(FileInfo.SetMode)) {
 
                 // Update the mode
                 sql.append("Mode = ");
@@ -969,7 +969,7 @@ public class PostgreSQLDBInterface extends JdbcDBInterface implements DBQueueInt
             }
 
             // Check if the access date/time has been set
-            if (finfo.hasSetFlag(FileInfo.Set.AccessDate)) {
+            if (finfo.hasSetFlag(FileInfo.SetAccessDate)) {
 
                 // Add the SQL to update the access date/time
                 sql.append(" AccessDate = ");
@@ -978,7 +978,7 @@ public class PostgreSQLDBInterface extends JdbcDBInterface implements DBQueueInt
             }
 
             // Check if the modify date/time has been set
-            if (finfo.hasSetFlag(FileInfo.Set.ModifyDate)) {
+            if (finfo.hasSetFlag(FileInfo.SetModifyDate)) {
 
                 // Add the SQL to update the modify date/time
                 sql.append(" ModifyDate = ");
@@ -987,7 +987,7 @@ public class PostgreSQLDBInterface extends JdbcDBInterface implements DBQueueInt
             }
 
             // Check if the inode change date/time has been set
-            if (finfo.hasSetFlag(FileInfo.Set.ChangeDate)) {
+            if (finfo.hasSetFlag(FileInfo.SetChangeDate)) {
 
                 // Add the SQL to update the change date/time
                 sql.append(" ChangeDate = ");
@@ -996,7 +996,7 @@ public class PostgreSQLDBInterface extends JdbcDBInterface implements DBQueueInt
             }
 
             // Check if the creation date/time has been set
-            if (finfo.hasSetFlag(FileInfo.Set.CreationDate)) {
+            if (finfo.hasSetFlag(FileInfo.SetCreationDate)) {
 
                 // Add the SQL to update the creation date/time
                 sql.append(" CreateDate = ");
