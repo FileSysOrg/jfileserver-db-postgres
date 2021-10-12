@@ -4,7 +4,7 @@
 
     <groupId>org.filesys</groupId>
     <artifactId>jfileserver-db-postgres</artifactId>
-    <version>1.3.8</version>
+    <version>1.3.9-SNAPSHOT</version>
 
     <name>${project.groupId}:${project.artifactId}</name>
     <description>JFileServer database filesystem implementation using PostGreSQL</description>
@@ -174,7 +174,7 @@
         <connection>scm:git:git@github.com:FileSysOrg/jfileserver-db-postgres.git</connection>
         <developerConnection>scm:git:git@github.com:FileSysOrg/jfileserver-db-postgres.git</developerConnection>
         <url>https://github.com/FileSysOrg/jfileserver-db-postgres</url>
-        <tag>jfileserver-db-postgres-1.3.8</tag>
+        <tag>jfileserver-db-postgres-1.3.2</tag>
     </scm>
 
     <distributionManagement>
