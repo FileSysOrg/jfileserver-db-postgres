@@ -3310,7 +3310,7 @@ public class PostgreSQLDBInterface extends JdbcDBInterface implements DBQueueInt
         try {
 
             // Make sure we have a Postgres connection
-            conn = getConnection();
+            conn = getConnection( DBConnectionPool.PermanentLease);
 
             if (conn instanceof PGConnection) {
 
