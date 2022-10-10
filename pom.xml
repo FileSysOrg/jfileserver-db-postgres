@@ -28,7 +28,7 @@
         <dependency>
             <groupId>org.filesys</groupId>
             <artifactId>jfileserver</artifactId>
-            <version>1.3.12-SNAPSHOT</version>
+            <version>1.3.12</version>
         </dependency>
 
         <!-- PostGreSQL JDBC -->
