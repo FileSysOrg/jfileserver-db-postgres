@@ -109,6 +109,8 @@ public class PostgreSQLSearchContext extends DBSearchContext {
 						attr += FileAttribute.NTOffline;
 				}
 
+				if ( attr == 0)
+					attr = FileAttribute.NTNormal;
 				info.setFileAttributes(attr);
 
 				// Get the group/owner id

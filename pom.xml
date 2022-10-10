@@ -28,14 +28,14 @@
         <dependency>
             <groupId>org.filesys</groupId>
             <artifactId>jfileserver</artifactId>
-            <version>1.3.11</version>
+            <version>1.3.12-SNAPSHOT</version>
         </dependency>
 
         <!-- PostGreSQL JDBC -->
         <dependency>
             <groupId>org.postgresql</groupId>
             <artifactId>postgresql</artifactId>
-            <version>42.2.14</version>
+            <version>42.5.0</version>
         </dependency>
     </dependencies>
 
