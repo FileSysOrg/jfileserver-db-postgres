@@ -36,13 +36,7 @@ import java.util.EnumSet;
 
 import org.filesys.debug.Debug;
 import org.filesys.server.config.InvalidConfigurationException;
-import org.filesys.server.filesys.FileAttribute;
-import org.filesys.server.filesys.FileExistsException;
-import org.filesys.server.filesys.FileInfo;
-import org.filesys.server.filesys.FileName;
-import org.filesys.server.filesys.FileOpenParams;
-import org.filesys.server.filesys.FileStatus;
-import org.filesys.server.filesys.FileType;
+import org.filesys.server.filesys.*;
 import org.filesys.server.filesys.cache.FileState;
 import org.filesys.server.filesys.db.DBDataDetails;
 import org.filesys.server.filesys.db.DBDataDetailsList;
@@ -543,9 +537,18 @@ public class PostgreSQLDBInterface extends JdbcDBInterface implements DBQueueInt
             pstmt.setBoolean(10, FileAttribute.hasAttribute(params.getAttributes(), FileAttribute.Hidden));
             pstmt.setInt(11, 0);
 
-            pstmt.setInt(12, params.hasGid() ? params.getGid() : 0);
-            pstmt.setInt(13, params.hasUid() ? params.getUid() : 0);
-            pstmt.setInt(14, params.hasMode() ? params.getMode() : 0);
+            if ( params instanceof UnixFileOpenParams) {
+                UnixFileOpenParams unixParams = (UnixFileOpenParams) params;
+
+                pstmt.setInt(12, unixParams.hasGid() ? unixParams.getGid() : 0);
+                pstmt.setInt(13, unixParams.hasUid() ? unixParams.getUid() : 0);
+                pstmt.setInt(14, unixParams.hasMode() ? unixParams.getMode() : 0);
+            }
+            else {
+                pstmt.setInt(12, 0);
+                pstmt.setInt(13, 0);
+                pstmt.setInt(14, 0);
+            }
 
             pstmt.setBoolean(15, params.isSymbolicLink());
 
@@ -586,11 +589,12 @@ public class PostgreSQLDBInterface extends JdbcDBInterface implements DBQueueInt
                 }
 
                 // Check if the new file is a symbolic link
-                if (params.isSymbolicLink()) {
+                if (params.isSymbolicLink() && params instanceof UnixFileOpenParams) {
+                    UnixFileOpenParams unixParams = (UnixFileOpenParams) params;
 
                     // Create the symbolic link record
                     String symSql = "INSERT INTO " + getSymLinksTableName() + " (FileId, SymLink) VALUES (" + fileId + ",'"
-                            + params.getSymbolicLinkName() + "');";
+                            + unixParams.getSymbolicLinkName() + "');";
 
                     // DEBUG
                     if (Debug.EnableInfo && hasSQLDebug())
