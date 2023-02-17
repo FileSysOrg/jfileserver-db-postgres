@@ -408,12 +408,12 @@ public class PostgreSQLDBInterface extends JdbcDBInterface implements DBQueueInt
     /**
      * Check if a file/folder exists
      *
-     * @param dirId int
+     * @param dirId long
      * @param fname String
      * @return FileStatus
      * @throws DBException Database error
      */
-    public FileStatus fileExists(int dirId, String fname)
+    public FileStatus fileExists(long dirId, String fname)
             throws DBException {
 
         // Check if the file exists, and whether it is a file or folder
@@ -477,14 +477,14 @@ public class PostgreSQLDBInterface extends JdbcDBInterface implements DBQueueInt
      * Create a file record for a new file or folder
      *
      * @param fname  String
-     * @param dirId  int
+     * @param dirId  long
      * @param params FileOpenParams
      * @param retain boolean
-     * @return int
+     * @return long
      * @throws DBException Database error
      * @throws FileExistsException File record already exists
      */
-    public int createFileRecord(String fname, int dirId, FileOpenParams params, boolean retain)
+    public long createFileRecord(String fname, long dirId, FileOpenParams params, boolean retain)
             throws DBException, FileExistsException {
 
         // Create a new file record for a file/folder and return a unique file id
@@ -492,7 +492,7 @@ public class PostgreSQLDBInterface extends JdbcDBInterface implements DBQueueInt
         PreparedStatement pstmt = null;
         Statement stmt = null;
 
-        int fileId = -1;
+        long fileId = -1L;
         boolean duplicateKey = false;
 
         try {
@@ -516,7 +516,7 @@ public class PostgreSQLDBInterface extends JdbcDBInterface implements DBQueueInt
             if (rs.next()) {
 
                 // File record already exists, return the existing file id
-                fileId = rs.getInt("FileId");
+                fileId = rs.getLong("FileId");
                 Debug.println("File record already exists for " + fname + ", fileId=" + fileId);
                 return fileId;
             }
@@ -535,7 +535,7 @@ public class PostgreSQLDBInterface extends JdbcDBInterface implements DBQueueInt
             pstmt.setLong(2, timeNow);
             pstmt.setLong(3, timeNow);
             pstmt.setLong(4, timeNow);
-            pstmt.setInt(5, dirId);
+            pstmt.setLong(5, dirId);
             pstmt.setBoolean(6, dirRec);
             pstmt.setBoolean(7, FileAttribute.hasAttribute(params.getAttributes(), FileAttribute.ReadOnly));
             pstmt.setBoolean(8, FileAttribute.hasAttribute(params.getAttributes(), FileAttribute.Archive));
@@ -560,10 +560,10 @@ public class PostgreSQLDBInterface extends JdbcDBInterface implements DBQueueInt
                 ResultSet rs2 = stmt.executeQuery("SELECT currval('" + getFileSysTableName() + "_FileId_seq');");
 
                 if (rs2.next())
-                    fileId = rs2.getInt(1);
+                    fileId = rs2.getLong(1);
 
                 // Check if the returned file id is valid
-                if (fileId == -1)
+                if (fileId == -1L)
                     throw new DBException("Failed to get file id for " + fname);
 
                 // If retention is enabled then create a retention record for
@@ -665,11 +665,11 @@ public class PostgreSQLDBInterface extends JdbcDBInterface implements DBQueueInt
      * Create a stream record for a new file stream
      *
      * @param sname String
-     * @param fid   int
-     * @return int
+     * @param fid   long
+     * @return long
      * @throws DBException Database error
      */
-    public int createStreamRecord(String sname, int fid)
+    public long createStreamRecord(String sname, long fid)
             throws DBException {
 
         // Create a new file stream attached to the specified file
@@ -677,7 +677,7 @@ public class PostgreSQLDBInterface extends JdbcDBInterface implements DBQueueInt
         PreparedStatement stmt = null;
         Statement stmt2 = null;
 
-        int streamId = -1;
+        long streamId = -1L;
 
         try {
 
@@ -689,7 +689,7 @@ public class PostgreSQLDBInterface extends JdbcDBInterface implements DBQueueInt
 
             stmt = conn.prepareStatement("INSERT INTO " + getStreamsTableName()
                     + "(FileId,StreamName,CreateDate,ModifyDate,AccessDate,StreamSize) VALUES (?,?,?,?,?,?)");
-            stmt.setInt(1, fid);
+            stmt.setLong(1, fid);
             stmt.setString(2, sname);
             stmt.setLong(3, timeNow);
             stmt.setLong(4, timeNow);
@@ -708,7 +708,7 @@ public class PostgreSQLDBInterface extends JdbcDBInterface implements DBQueueInt
                 ResultSet rs2 = stmt2.executeQuery("SELECT currval('" + getStreamsTableName() + "_StreamId_seq');");
 
                 if (rs2.next())
-                    streamId = rs2.getInt(1);
+                    streamId = rs2.getLong(1);
                 rs2.close();
             }
         }
@@ -753,12 +753,12 @@ public class PostgreSQLDBInterface extends JdbcDBInterface implements DBQueueInt
     /**
      * Delete a file or folder record
      *
-     * @param dirId    int
-     * @param fid      int
+     * @param dirId    long
+     * @param fid      long
      * @param markOnly boolean
      * @throws DBException Database error
      */
-    public void deleteFileRecord(int dirId, int fid, boolean markOnly)
+    public void deleteFileRecord(long dirId, long fid, boolean markOnly)
             throws DBException {
 
         // Delete a file record from the database, or mark the file record as deleted
@@ -836,12 +836,12 @@ public class PostgreSQLDBInterface extends JdbcDBInterface implements DBQueueInt
     /**
      * Delete a file stream record
      *
-     * @param fid      int
-     * @param stid     int
+     * @param fid      long
+     * @param stid     long
      * @param markOnly boolean
      * @throws DBException Database error
      */
-    public void deleteStreamRecord(int fid, int stid, boolean markOnly)
+    public void deleteStreamRecord(long fid, long stid, boolean markOnly)
             throws DBException {
 
         // Delete a file stream from the database, or mark the stream as deleted
@@ -893,12 +893,12 @@ public class PostgreSQLDBInterface extends JdbcDBInterface implements DBQueueInt
     /**
      * Set file information for a file or folder
      *
-     * @param dirId int
-     * @param fid   int
+     * @param dirId long
+     * @param fid   long
      * @param finfo FileInfo
      * @throws DBException Database error
      */
-    public void setFileInformation(int dirId, int fid, FileInfo finfo)
+    public void setFileInformation(long dirId, long fid, FileInfo finfo)
             throws DBException {
 
         // Set file information fields
@@ -1050,13 +1050,13 @@ public class PostgreSQLDBInterface extends JdbcDBInterface implements DBQueueInt
     /**
      * Set information for a file stream
      *
-     * @param dirId int
-     * @param fid   int
-     * @param stid  int
+     * @param dirId long
+     * @param fid   long
+     * @param stid  long
      * @param sinfo StreamInfo
      * @throws DBException Database error
      */
-    public void setStreamInformation(int dirId, int fid, int stid, StreamInfo sinfo)
+    public void setStreamInformation(long dirId, long fid, long stid, StreamInfo sinfo)
             throws DBException {
 
         // Set file stream information fields
@@ -1148,18 +1148,18 @@ public class PostgreSQLDBInterface extends JdbcDBInterface implements DBQueueInt
     /**
      * Get the id for a file/folder, or -1 if the file/folder does not exist.
      *
-     * @param dirId    int
+     * @param dirId    long
      * @param fname    String
      * @param dirOnly  boolean
      * @param caseLess boolean
-     * @return int
+     * @return long
      * @throws DBException Database error
      */
-    public int getFileId(int dirId, String fname, boolean dirOnly, boolean caseLess)
+    public long getFileId(long dirId, String fname, boolean dirOnly, boolean caseLess)
             throws DBException {
 
         // Get the file id for a file/folder
-        int fileId = -1;
+        long fileId = -1;
 
         Connection conn = null;
         Statement stmt = null;
@@ -1213,7 +1213,7 @@ public class PostgreSQLDBInterface extends JdbcDBInterface implements DBQueueInt
             if (rs.next()) {
 
                 // Get the unique file id for the file or folder
-                fileId = rs.getInt("FileId");
+                fileId = rs.getLong("FileId");
             }
 
             // Close the result set
@@ -1251,13 +1251,13 @@ public class PostgreSQLDBInterface extends JdbcDBInterface implements DBQueueInt
     /**
      * Get information for a file or folder
      *
-     * @param dirId     int
-     * @param fid       int
+     * @param dirId     long
+     * @param fid       long
      * @param infoLevel FileInfoLevel
      * @return FileInfo
      * @throws DBException Database error
      */
-    public DBFileInfo getFileInformation(int dirId, int fid, FileInfoLevel infoLevel)
+    public DBFileInfo getFileInformation(long dirId, long fid, FileInfoLevel infoLevel)
             throws DBException {
 
         // Create a SQL select for the required file information
@@ -1414,13 +1414,13 @@ public class PostgreSQLDBInterface extends JdbcDBInterface implements DBQueueInt
     /**
      * Get information for a file stream
      *
-     * @param fid       int
-     * @param stid      int
+     * @param fid       long
+     * @param stid      long
      * @param infoLevel StreamInfoLevel
      * @return StreamInfo
      * @throws DBException Database error
      */
-    public StreamInfo getStreamInformation(int fid, int stid, StreamInfoLevel infoLevel)
+    public StreamInfo getStreamInformation(long fid, long stid, StreamInfoLevel infoLevel)
             throws DBException {
 
         // Create a SQL select for the required stream information
@@ -1534,12 +1534,12 @@ public class PostgreSQLDBInterface extends JdbcDBInterface implements DBQueueInt
     /**
      * Return the list of streams for the specified file
      *
-     * @param fid       int
+     * @param fid       long
      * @param infoLevel StreamInfoLevel
      * @return StreamInfoList
      * @throws DBException Database error
      */
-    public StreamInfoList getStreamsList(int fid, StreamInfoLevel infoLevel)
+    public StreamInfoList getStreamsList(long fid, StreamInfoLevel infoLevel)
             throws DBException {
 
         // Create a SQL select for the required stream information
@@ -1663,14 +1663,14 @@ public class PostgreSQLDBInterface extends JdbcDBInterface implements DBQueueInt
     /**
      * Rename a file or folder, may also change the parent directory.
      *
-     * @param dirId   int
-     * @param fid     int
+     * @param dirId   long
+     * @param fid     long
      * @param newName String
-     * @param newDir  int
+     * @param newDir  long
      * @throws DBException Database error
      * @throws FileNotFoundException File record not found
      */
-    public void renameFileRecord(int dirId, int fid, String newName, int newDir)
+    public void renameFileRecord(long dirId, long fid, String newName, long newDir)
             throws DBException, FileNotFoundException {
 
         // Rename a file/folder
@@ -1728,13 +1728,13 @@ public class PostgreSQLDBInterface extends JdbcDBInterface implements DBQueueInt
     /**
      * Rename a file stream
      *
-     * @param dirId   int
-     * @param fid     int
-     * @param stid    int
+     * @param dirId   long
+     * @param fid     long
+     * @param stid    long
      * @param newName String
      * @throws DBException Database error
      */
-    public void renameStreamRecord(int dirId, int fid, int stid, String newName)
+    public void renameStreamRecord(long dirId, long fid, long stid, String newName)
             throws DBException {
         // TODO Auto-generated method stub
 
@@ -1744,12 +1744,12 @@ public class PostgreSQLDBInterface extends JdbcDBInterface implements DBQueueInt
      * Return the retention period expiry date/time for the specified file, or zero if the
      * file/folder is not under retention.
      *
-     * @param dirId int
-     * @param fid   int
+     * @param dirId long
+     * @param fid   long
      * @return RetentionDetails
      * @throws DBException Database error
      */
-    public RetentionDetails getFileRetentionDetails(int dirId, int fid)
+    public RetentionDetails getFileRetentionDetails(long dirId, long fid)
             throws DBException {
 
         // Check if retention is enabled
@@ -1803,7 +1803,7 @@ public class PostgreSQLDBInterface extends JdbcDBInterface implements DBQueueInt
     /**
      * Start a directory search
      *
-     * @param dirId      int
+     * @param dirId      long
      * @param searchPath String
      * @param attrib     int
      * @param infoLevel  FileInfoLevel
@@ -1811,7 +1811,7 @@ public class PostgreSQLDBInterface extends JdbcDBInterface implements DBQueueInt
      * @return DBSearchContext
      * @throws DBException Database error
      */
-    public DBSearchContext startSearch(int dirId, String searchPath, int attrib, FileInfoLevel infoLevel, int maxRecords)
+    public DBSearchContext startSearch(long dirId, String searchPath, int attrib, FileInfoLevel infoLevel, int maxRecords)
             throws DBException {
 
         // Search for files/folders in the specified folder
@@ -2008,8 +2008,8 @@ public class PostgreSQLDBInterface extends JdbcDBInterface implements DBQueueInt
                         // Write the file request to the queue database
                         m_reqStmt.clearParameters();
 
-                        m_reqStmt.setInt(1, fileReq.getFileId());
-                        m_reqStmt.setInt(2, fileReq.getStreamId());
+                        m_reqStmt.setLong(1, fileReq.getFileId());
+                        m_reqStmt.setLong(2, fileReq.getStreamId());
                         m_reqStmt.setInt(3, fileReq.isType().ordinal());
                         m_reqStmt.setString(4, fileReq.getTemporaryFile());
                         m_reqStmt.setString(5, fileReq.getVirtualPath());
@@ -2041,8 +2041,8 @@ public class PostgreSQLDBInterface extends JdbcDBInterface implements DBQueueInt
                         // Write the request record to the database
                         m_tranStmt.clearParameters();
 
-                        m_tranStmt.setInt(1, fileReq.getFileId());
-                        m_tranStmt.setInt(2, fileReq.getStreamId());
+                        m_tranStmt.setLong(1, fileReq.getFileId());
+                        m_tranStmt.setLong(2, fileReq.getStreamId());
                         m_tranStmt.setInt(3, fileReq.isType().ordinal());
                         m_tranStmt.setInt(4, fileReq.getTransactionId());
                         m_tranStmt.setString(5, fileReq.getTemporaryFile());
@@ -2716,8 +2716,8 @@ public class PostgreSQLDBInterface extends JdbcDBInterface implements DBQueueInt
             while (rs.next()) {
 
                 // Get the file request details
-                int fid = rs.getInt("FileId");
-                int stid = rs.getInt("StreamId");
+                long fid = rs.getLong("FileId");
+                long stid = rs.getLong("StreamId");
                 String tempPath = rs.getString("TempFile");
                 String virtPath = rs.getString("VirtualPath");
 
@@ -2771,11 +2771,11 @@ public class PostgreSQLDBInterface extends JdbcDBInterface implements DBQueueInt
      *
      * @param conn Connection
      * @param stmt Statement
-     * @param fid  int
+     * @param fid  long
      * @return RetentionDetails
      * @throws SQLException SQL error
      */
-    private final RetentionDetails getRetentionExpiryDateTime(Connection conn, Statement stmt, int fid)
+    private final RetentionDetails getRetentionExpiryDateTime(Connection conn, Statement stmt, long fid)
             throws SQLException {
 
         // Get the retention expiry date/time for the specified file/folder
@@ -2866,12 +2866,12 @@ public class PostgreSQLDBInterface extends JdbcDBInterface implements DBQueueInt
     /**
      * Return the file data details for the specified file or stream.
      *
-     * @param fileId   int
-     * @param streamId int
+     * @param fileId   long
+     * @param streamId long
      * @return DBDataDetails
      * @throws DBException Database error
      */
-    public DBDataDetails getFileDataDetails(int fileId, int streamId)
+    public DBDataDetails getFileDataDetails(long fileId, long streamId)
             throws DBException {
 
         // Load the file details from the data table
@@ -2950,13 +2950,13 @@ public class PostgreSQLDBInterface extends JdbcDBInterface implements DBQueueInt
     /**
      * Load file data from the database into a temporary/local file
      *
-     * @param fileId   int
-     * @param streamId int
+     * @param fileId   long
+     * @param streamId long
      * @param fileSeg  FileSegment
      * @throws DBException Database error
      * @throws IOException I/O error
      */
-    public void loadFileData(int fileId, int streamId, FileSegment fileSeg)
+    public void loadFileData(long fileId, long streamId, FileSegment fileSeg)
             throws DBException, IOException {
 
         // Open the temporary file
@@ -3133,12 +3133,12 @@ public class PostgreSQLDBInterface extends JdbcDBInterface implements DBQueueInt
     /**
      * Load Jar file data from the database into a temporary file
      *
-     * @param jarId  int
+     * @param jarId  long
      * @param jarSeg FileSegment
      * @throws DBException Database error
      * @throws IOException I/O error
      */
-    public void loadJarData(int jarId, FileSegment jarSeg)
+    public void loadJarData(long jarId, FileSegment jarSeg)
             throws DBException, IOException {
 
         // Load the Jar file data
@@ -3281,14 +3281,14 @@ public class PostgreSQLDBInterface extends JdbcDBInterface implements DBQueueInt
     /**
      * Save the file data from the temporary/local file to the database
      *
-     * @param fileId   int
-     * @param streamId int
+     * @param fileId   long
+     * @param streamId long
      * @param fileSeg  FileSegment
      * @return int
      * @throws DBException Database error
      * @throws IOException I/O error
      */
-    public int saveFileData(int fileId, int streamId, FileSegment fileSeg)
+    public int saveFileData(long fileId, long streamId, FileSegment fileSeg)
             throws DBException, IOException {
 
         // Get the temporary file size
@@ -3414,8 +3414,8 @@ public class PostgreSQLDBInterface extends JdbcDBInterface implements DBQueueInt
 
                 // Store the current fragment details
                 stmt.clearParameters();
-                stmt.setInt(1, fileId);
-                stmt.setInt(2, streamId);
+                stmt.setLong(1, fileId);
+                stmt.setLong(2, streamId);
                 stmt.setInt(3, fragNo++);
                 stmt.setInt(4, (int) fragSize);
                 stmt.setLong(5, oid);
@@ -3664,12 +3664,12 @@ public class PostgreSQLDBInterface extends JdbcDBInterface implements DBQueueInt
     /**
      * Delete the file data for the specified file/stream
      *
-     * @param fileId   int
-     * @param streamId int
+     * @param fileId   long
+     * @param streamId long
      * @throws DBException Database error
      * @throws IOException I/O error
      */
-    public void deleteFileData(int fileId, int streamId)
+    public void deleteFileData(long fileId, long streamId)
             throws DBException, IOException {
 
         // Delete the file data records for the file or stream
@@ -3784,11 +3784,11 @@ public class PostgreSQLDBInterface extends JdbcDBInterface implements DBQueueInt
     /**
      * Delete the file data for the specified Jar file
      *
-     * @param jarId int
+     * @param jarId long
      * @throws DBException Database error
      * @throws IOException I/O error
      */
-    public void deleteJarData(int jarId)
+    public void deleteJarData(long jarId)
             throws DBException, IOException {
 
         // Delete the data records for the Jar file data
@@ -3890,12 +3890,12 @@ public class PostgreSQLDBInterface extends JdbcDBInterface implements DBQueueInt
     /**
      * Create a file id to object id mapping
      *
-     * @param fileId   int
-     * @param streamId int
+     * @param fileId   long
+     * @param streamId long
      * @param objectId String
      * @throws DBException Database error
      */
-    public void saveObjectId(int fileId, int streamId, String objectId)
+    public void saveObjectId(long fileId, long streamId, String objectId)
             throws DBException {
 
         // Create a new file id/object id mapping record
@@ -3959,12 +3959,12 @@ public class PostgreSQLDBInterface extends JdbcDBInterface implements DBQueueInt
     /**
      * Load the object id for the specified file id
      *
-     * @param fileId   int
-     * @param streamId int
+     * @param fileId   long
+     * @param streamId long
      * @return String
      * @throws DBException Database error
      */
-    public String loadObjectId(int fileId, int streamId)
+    public String loadObjectId(long fileId, long streamId)
             throws DBException {
 
         // Load the object id for the specified file id
@@ -4024,12 +4024,12 @@ public class PostgreSQLDBInterface extends JdbcDBInterface implements DBQueueInt
     /**
      * Delete a file id/object id mapping
      *
-     * @param fileId   int
-     * @param streamId int
+     * @param fileId   long
+     * @param streamId long
      * @param objectId String
      * @throws DBException Database error
      */
-    public void deleteObjectId(int fileId, int streamId, String objectId)
+    public void deleteObjectId(long fileId, long streamId, String objectId)
             throws DBException {
 
         // Delete a file id/object id mapping record
@@ -4080,12 +4080,12 @@ public class PostgreSQLDBInterface extends JdbcDBInterface implements DBQueueInt
     /**
      * Return the data for a symbolic link
      *
-     * @param dirId int
-     * @param fid   int
+     * @param dirId long
+     * @param fid   long
      * @return String
      * @throws DBException Database error
      */
-    public String readSymbolicLink(int dirId, int fid)
+    public String readSymbolicLink(long dirId, long fid)
             throws DBException {
 
         // Delete a file id/object id mapping record
@@ -4146,11 +4146,11 @@ public class PostgreSQLDBInterface extends JdbcDBInterface implements DBQueueInt
     /**
      * Delete a symbolic link record
      *
-     * @param dirId int
-     * @param fid   int
+     * @param dirId long
+     * @param fid   long
      * @throws DBException Database error
      */
-    public void deleteSymbolicLinkRecord(int dirId, int fid)
+    public void deleteSymbolicLinkRecord(long dirId, long fid)
             throws DBException {
 
         // Delete the symbolic link record for a file
@@ -4202,11 +4202,11 @@ public class PostgreSQLDBInterface extends JdbcDBInterface implements DBQueueInt
     /**
      * Convert a file id to a share relative path
      *
-     * @param fileid int
+     * @param fileid long
      * @param stmt   Statement
      * @return String
      */
-    private String buildPathForFileId(int fileid, Statement stmt) {
+    private String buildPathForFileId(long fileid, Statement stmt) {
 
         // Build an array of folder names working back from the files id
         StringList names = new StringList();
@@ -4214,7 +4214,7 @@ public class PostgreSQLDBInterface extends JdbcDBInterface implements DBQueueInt
         try {
 
             // Loop, walking backwards up the tree until we hit root
-            int curFid = fileid;
+            long curFid = fileid;
 
             do {
 
@@ -4228,7 +4228,7 @@ public class PostgreSQLDBInterface extends JdbcDBInterface implements DBQueueInt
                     names.addString(rs.getString("FileName"));
 
                     // The directory id becomes the next file id to search for
-                    curFid = rs.getInt("DirId");
+                    curFid = rs.getLong("DirId");
 
                     // Close the resultset
                     rs.close();

@@ -61,7 +61,7 @@ public class PostgreSQLSearchContext extends DBSearchContext {
 			while (m_rs.next()) {
 
 				// Get the file name for the next file
-				info.setFileId(m_rs.getInt("FileId"));
+				info.setFileId(m_rs.getLong("FileId"));
 				info.setFileName(m_rs.getString("FileName"));
 				info.setSize(m_rs.getLong("FileSize"));
 
